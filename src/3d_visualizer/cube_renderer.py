@@ -8,8 +8,9 @@ class CubeRenderer:
     def __init__(self, ax):
         self.ax = ax
         self.size = 0.5  # Cube half size
-        self.arrow_scale = 0.5  # Increased arrow size
+        self.arrow_scale = 0.5  # Arrow size
         self.threshold = 0.01  # Threshold for displaying stress arrows
+        self.view_scale = 0.9  # Default view scale for the plot
 
         # Define cube vertices (centered at origin)
         self.vertices = np.array([
@@ -111,9 +112,9 @@ class CubeRenderer:
             # -x face
             self.ax.quiver(face_centers[4][0], face_centers[4][1],
                            face_centers[4][2],
-                           -face_normals[4][0] * sigma_x * self.arrow_scale,
-                           -face_normals[4][1] * sigma_x * self.arrow_scale,
-                           -face_normals[4][2] * sigma_x * self.arrow_scale,
+                           face_normals[4][0] * sigma_x * self.arrow_scale,
+                           face_normals[4][1] * sigma_x * self.arrow_scale,
+                           face_normals[4][2] * sigma_x * self.arrow_scale,
                            color='red', arrow_length_ratio=0.2, linewidth=2)
             # +x face
             self.ax.quiver(face_centers[5][0], face_centers[5][1],
@@ -129,9 +130,9 @@ class CubeRenderer:
             # -y face
             self.ax.quiver(face_centers[2][0], face_centers[2][1],
                            face_centers[2][2],
-                           -face_normals[2][0] * sigma_y * self.arrow_scale,
-                           -face_normals[2][1] * sigma_y * self.arrow_scale,
-                           -face_normals[2][2] * sigma_y * self.arrow_scale,
+                           face_normals[2][0] * sigma_y * self.arrow_scale,
+                           face_normals[2][1] * sigma_y * self.arrow_scale,
+                           face_normals[2][2] * sigma_y * self.arrow_scale,
                            color='red', arrow_length_ratio=0.2, linewidth=2)
             # +y face
             self.ax.quiver(face_centers[3][0], face_centers[3][1],
@@ -147,9 +148,9 @@ class CubeRenderer:
             # -z face
             self.ax.quiver(face_centers[0][0], face_centers[0][1],
                            face_centers[0][2],
-                           -face_normals[0][0] * sigma_z * self.arrow_scale,
-                           -face_normals[0][1] * sigma_z * self.arrow_scale,
-                           -face_normals[0][2] * sigma_z * self.arrow_scale,
+                           face_normals[0][0] * sigma_z * self.arrow_scale,
+                           face_normals[0][1] * sigma_z * self.arrow_scale,
+                           face_normals[0][2] * sigma_z * self.arrow_scale,
                            color='red', arrow_length_ratio=0.2, linewidth=2)
             # +z face
             self.ax.quiver(face_centers[1][0], face_centers[1][1],
@@ -286,10 +287,9 @@ class CubeRenderer:
         self.ax.legend(loc='upper right')
 
         # Set limits based on rotated vertices with extra margin
-        margin = 0.7
-        self.ax.set_xlim([np.min(rotated_vertices[:, 0])*margin,
-                         np.max(rotated_vertices[:, 0])*margin])
-        self.ax.set_ylim([np.min(rotated_vertices[:, 1])*margin,
-                         np.max(rotated_vertices[:, 1])*margin])
-        self.ax.set_zlim([np.min(rotated_vertices[:, 2])*margin,
-                         np.max(rotated_vertices[:, 2])*margin])
+        self.ax.set_xlim([np.min(rotated_vertices[:, 0])/self.view_scale,
+                         np.max(rotated_vertices[:, 0])/self.view_scale])
+        self.ax.set_ylim([np.min(rotated_vertices[:, 1])/self.view_scale,
+                         np.max(rotated_vertices[:, 1])/self.view_scale])
+        self.ax.set_zlim([np.min(rotated_vertices[:, 2])/self.view_scale,
+                         np.max(rotated_vertices[:, 2])/self.view_scale])

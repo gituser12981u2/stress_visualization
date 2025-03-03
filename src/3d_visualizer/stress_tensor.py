@@ -7,8 +7,8 @@ class StressTensor:
         if initial_tensor is None:
             self.stress_tensor = np.array([
                 [1.0, 0.5, 0.0],  # [σx, τxy, τxz]
-                [0.5, 0.0, 0.0],  # [τxy, σy, τyz]
-                [0.0, 0.0, 0.0]   # [τxz, τyz, σz]
+                [0.5, 1.0, 0.0],  # [τxy, σy, τyz]
+                [0.0, 0.5, 1.0]   # [τxz, τyz, σz]
             ])
         else:
             self.stress_tensor = initial_tensor
