@@ -1,3 +1,26 @@
+"""
+Stress Tensor 3D Visualization Module
+
+This module provides an interactive visualization of 3D stress tensors using
+a cube representation with color-coded stress arrows. It allows one to rotate
+the element around three axes and observe how stress components transform
+under rotation.
+
+The visualization includes:
+1. A 3D cube with color-coded stress arrows
+2. Stress variation plots showing how components change with rotation angle
+3. Interactive sliders to control rotation angles
+4. A checkbox to toggle graph visibility
+
+Classes:
+    StressVisualizer3D: Main class for the 3D stress visualization application
+
+Usage:
+    Run this script directly to launch the visualization
+
+    $ python stress_visualizer3d.py
+"""
+
 from matplotlib.gridspec import GridSpec
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, CheckButtons
@@ -7,8 +30,27 @@ from stress_plotter import StressPlotter
 from stress_tensor import StressTensor
 
 
-class StressVisualizer:
+class StressVisualizer3D:
+    """
+    Interactive 3D stress tensor visualization application.
+
+    This class creates a matplotlib-based GUI that visualizes stress tensors
+    on a 3D cube element. It allows rotation around three axes (x, y, z) using
+    sliders
+    and displays the transformed stress components with color-coded arrows.
+
+    Attributes:
+        fig (matplotlib.figure.Figure): The main figure containing all plots
+        ax_3d (matplotlib.axes.Axes): 3D axes for the cube visualization
+        stress_tensor (StressTensor): Manages stress tensor calculations
+        cube_renderer (CubeRenderer): Handles rendering the 3D cube with
+        stress arrows
+        stress_plotter (StressPlotter): Manages plotting stress variation
+        show_graph (bool): Flag to toggle graph visibility
+    """
+
     def __init__(self):
+        """Initialize the visualization application with all components."""
         # Create figure and axes
         self.fig = plt.figure(figsize=(14, 8))
 
@@ -51,7 +93,7 @@ class StressVisualizer:
             self.ax_checkbox, ['Show Graph'], [self.show_graph])
         self.check.on_clicked(self.toggle_graph)
 
-    def toggle_graph(self, label):
+    def toggle_graph(self):
         """Toggle visibility of the stress vs. angle graph and adjust layout"""
         self.show_graph = not self.show_graph
 
@@ -85,7 +127,6 @@ class StressVisualizer:
 
     def create_sliders(self):
         """Create sliders for controlling rotation angles."""
-
         # Add sliders for rotation angles
         self.ax_theta_x = plt.axes([0.2, 0.02, 0.6, 0.03])
         self.ax_theta_y = plt.axes([0.2, 0.06, 0.6, 0.03])
@@ -106,6 +147,12 @@ class StressVisualizer:
         self.theta_z_slider.on_changed(self.update)
 
     def update(self, val):
+        """
+        Update all visualization based on current slider values.
+
+        Args:
+            val: The changed slider value (unused but required by matplotlib)
+        """
         theta_x = self.theta_x_slider.val
         theta_y = self.theta_y_slider.val
         theta_z = self.theta_z_slider.val
@@ -140,5 +187,5 @@ class StressVisualizer:
 
 
 if __name__ == "__main__":
-    visualizer = StressVisualizer()
+    visualizer = StressVisualizer3D()
     visualizer.show()

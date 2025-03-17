@@ -1,3 +1,27 @@
+"""
+Stress Tensor 2D Visualization Module
+
+This module provides an interactive visualization of 2D stress tensors using
+a cube representation with color-coded stress arrows. It allows one to rotate
+the element around three axes and observe how stress components transform
+under rotation.
+
+The visualization includes:
+1. A 2D element with color-coded stress arrows
+2. Stress variation plots showing how components change with rotation angle
+3. Principal stress calculation and visualization
+3. Interactive sliders to control rotation angles
+
+Classes:
+    StressVisualizer2D: Main class for the 2D stress visualization application
+
+Usage:
+    Run this script directly to launch the visualization
+
+    $ python stress_visualizer2d.py
+"""
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
@@ -5,13 +29,38 @@ import matplotlib.gridspec as gridspec
 
 
 class StressVisualizer2D:
+    """
+    Interactive 2D stress transformation visualization application.
+
+    This class creates a matplotlib-based GUI that visualizes stress
+    transformation in 2D--plane stress. It displays a square element with
+    stress arrows that update as the element is rotated, and plots tress
+    variation with angle.
+
+    Attributes:
+        sigma_x (float): Normal stress in x-direction
+        sigma_y (float): Normal stress in y-direction
+        tau_xy (float): Shear stress
+        current_angle (float): Current rotation angle in degrees
+        sigma_1 (float): Maximum principal stress
+        sigma_2 (float): Minimum principal stress
+        principal_angle (float): Principal angle in degrees
+        fig (matplotlib.figure.Figure): The main figure containing all plots
+        ax_element (matplotlib.axes.Axes): Axes for the rotated element
+        ax_graph (matplotlib.axes.Axes): Axes for the stress variation plot
+    """
+
     def __init__(self):
+        """Initialize the 2D stress visualization with default values."""
         self.sigma_x = 100.0
         self.sigma_y = 10.0
         self.tau_xy = 60.0
 
         # Current angle
         self.current_angle = 0
+
+        # Calculate the principal stresses and angle
+        self.calculate_principal_values()
 
         self.fig = plt.figure(figsize=(15, 8))
         gs = gridspec.GridSpec(3, 2, height_ratios=[4, 0.5, 0.5])
@@ -27,14 +76,22 @@ class StressVisualizer2D:
             valmin=0,
             valmax=180,
             valinit=0,
-            valstep=1.0,
             slidermin=None,
             slidermax=None
         )
         self.theta_slider.on_changed(self.update)
 
     def calculate_stresses(self, theta_deg):
-        """Calculate transformed stresses for a given angle"""
+        """
+        Calculate transformed stresses for a given angle.
+
+        Args:
+            theta_deg (float): Rotation angle in degrees
+
+        Returns:
+            tuple: (sigma_x_prime, sigma_y_prime, tau_xy_prime) transformed
+            stresses
+        """
         theta = np.radians(theta_deg)
 
         # Calculate average and half-difference of normal stresses
@@ -54,7 +111,14 @@ class StressVisualizer2D:
         return sigma_x_prime, sigma_y_prime, tau_xy_prime
 
     def calculate_max_stress_magnitude(self):
-        """Calculate the maximum stress magnitude across all angles"""
+        """
+        Calculate the maximum stress magnitude across all angles.
+
+        This is used for scaling the stress arrows appropriately.
+
+        Returns:
+            float: Maximum absolute stress value
+        """
         angles = np.linspace(0, 180, 181)
         max_magnitude = 0
 
@@ -65,8 +129,43 @@ class StressVisualizer2D:
 
         return max_magnitude
 
+    def calculate_principal_values(self):
+        """
+        Calculate principal stresses and principal angle.
+
+        Sets:
+            self.sigma_1: Maximum principal stress
+            self.sigma2: Minimum principal stress
+            self.principal_angle: Principal angle in degrees
+        """
+        avg_normal = (self.sigma_x + self.sigma_y) / 2
+        half_diff = (self.sigma_x - self.sigma_y) / 2
+
+        # Principal stresses
+        r = np.sqrt(half_diff**2 + self.tau_xy**2)
+        self.sigma_1 = avg_normal + r
+        self.sigma_2 = avg_normal - r
+
+        # Principal angle
+        if abs(half_diff) < 1e-10:
+            self.principal_angle = 45.0 if self.tau_xy > 0 else -45.0
+        else:
+            self.principal_angle = np.degrees(
+                0.5 * np.arctan2(self.tau_xy, half_diff))
+
+        # Make angle between 0 and 90 degrees
+        if self.principal_angle < 0:
+            self.principal_angle += 90
+
+        self.principal_angle = self.principal_angle % 90
+
     def draw_element(self, angle_deg):
-        """Draw the rotated element with stress arrows"""
+        """
+        Draw the rotated element with stress arrows.
+
+        Args:
+            angle_deg (float): Rotation angle in degrees
+        """
         self.ax_element.clear()
         angle = np.radians(angle_deg)
 
@@ -195,20 +294,26 @@ class StressVisualizer2D:
 
         # Add legend
         if abs(sigma_x_prime) > 0.01 or abs(tau_prime) > 0.01:
-            self.ax_element.plot([], [], 'r-', label='Normal stress (σ)')
+            self.ax_element.plot([], [], 'r-', label='Normal stress x (σx)')
             self.ax_element.plot([], [], 'g-', label='Normal stress y (σy)')
-            self.ax_element.plot([], [], 'b-', label='Shear stress (τ)')
+            self.ax_element.plot([], [], 'b-', label='Shear stress (τxy)')
             self.ax_element.legend(loc='upper right')
 
         self.ax_element.set_title(f'Element at θ = {int(angle_deg)}°\n'
                                   f'σx\' = {sigma_x_prime:.2f}, σy\' = {sigma_y_prime:.2f}, τxy\' = {tau_prime:.2f}')
 
     def draw_graph(self, current_angle):
-        """Draw stress vs angle plot"""
+        """
+        Draw stress vs angle plot.
+
+        Args:
+            current_angle (float): Current rotation angle to highlight on the
+            plot
+        """
         self.ax_graph.clear()
 
         # Calculate stresses for all angles
-        angles = np.linspace(0, 180, 181)
+        angles = np.linspace(0, 180, 361)
         sigma_x_values = []
         sigma_y_values = []
         tau_values = []
@@ -223,6 +328,18 @@ class StressVisualizer2D:
         self.ax_graph.plot(angles, sigma_x_values, 'r-', label='σx\'')
         self.ax_graph.plot(angles, sigma_y_values, 'g-', label='σy\'')
         self.ax_graph.plot(angles, tau_values, 'b-', label='τxy\'')
+
+        # Add horizontal lines for principal stresses
+        self.ax_graph.axhline(y=self.sigma_1, color='m', linestyle='--',
+                              alpha=0.7, label=f'σ₁ = {self.sigma_1:.2f}')
+        self.ax_graph.axhline(y=self.sigma_2, color='c', linestyle='--',
+                              alpha=0.7, label=f'σ₂ = {self.sigma_2:.2f}')
+
+        # Add vertical lines for principal angle
+        self.ax_graph.axvline(x=self.principal_angle, color='m', linestyle=':', alpha=0.7,
+                              label=f'θp = {self.principal_angle:.2f}°')
+        self.ax_graph.axvline(x=self.principal_angle+90,
+                              color='c', linestyle=':', alpha=0.7)
 
         # Mark current angle
         current_sigma_x, current_sigma_y, current_tau = self.calculate_stresses(
@@ -246,15 +363,30 @@ class StressVisualizer2D:
         self.ax_graph.legend()
         self.ax_graph.set_title('Stress Transformation')
 
+        # Display principal values in text box
+        principal_text = (f"Principal Stresses:\n"
+                          f"σ₁ = {self.sigma_1:.2f}\n"
+                          f"σ₂ = {self.sigma_2:.2f}\n"
+                          f"Principal Angle (θp) = {self.principal_angle:.2f}°")
+
+        self.ax_graph.text(0.02, 0.02, principal_text,
+                           transform=self.ax_graph.transAxes,
+                           bbox=dict(facecolor='white', alpha=0.7), fontsize=9)
+
     def update(self, val):
-        """Update visualization when slider changes"""
+        """
+        Update visualization when slider changes.
+
+        Args:
+            val: The slider value (unused but required by matplotlib)
+        """
         angle = self.theta_slider.val
         self.draw_element(angle)
         self.draw_graph(angle)
         plt.draw()
 
     def show(self):
-        """Display the visualization"""
+        """Display the visualization."""
         self.update(0)
         plt.show()
 
