@@ -1,11 +1,46 @@
+"""
+Cube Renderer Module
+
+This module provides functionality for rendering a 3D cube with stress arrows
+representing normal and shear stress components. The cube and arrows are
+updated in real-time in the stress tensor is transformed by rotation.
+
+Classes:
+    CubeRenderer: Handles 3D rendering of the cube with stress arrows
+"""
+
+
 import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
 class CubeRenderer:
-    """Class to handle the 3D rendering of the cube with stress arrows."""
+    """
+    Class to handle the 3D rendering of the cube with stress arrows.
+
+    This class creates and updates a 3D visualization of a cube with color-
+    coded arrows representing normal and shear stress components. The arrows
+    scale with the magnitude of the stress components and are drawn on
+    appropriate faces.
+
+    Attributes:
+        ax (matplotlib.axes.Axes): The 3D matplotlib axes for rendering
+        size (float): Half size of the cube
+        arrow_scale (float): Scaling factor for arrows
+        threshold (float): Minimum stress magnitude threshold for displaying
+        arrows
+        vertices (numpy.ndarray): 3D coordinates of cube vertices
+        faces (list): Lists of vertex indices defining cube faces
+        face_colors (list): Colors for each face of the cube
+    """
 
     def __init__(self, ax):
+        """
+        Initialize the CubeRenderer with a 3D matplotlib axis.
+
+        Args:
+            ax (matplotlib.axes.Axes): The 3D matplotlib axes for rendering
+        """
         self.ax = ax
         self.size = 0.5  # Cube half size
         self.arrow_scale = 0.5  # Arrow size
@@ -38,7 +73,13 @@ class CubeRenderer:
                             'lightgreen', 'lightpink', 'lightpink']
 
     def draw_cube(self, R, transformed_stress):
-        """Render the cube with stress arrows given the rotation and stress."""
+        """
+        Render the cube with stress arrows given the rotation and stress.
+
+        Args:
+            R (numpy.ndarray): 3x3 rotation matrix
+            transformed_stress (numpy.ndarray): 3x3 transformed stress tensor
+        """
         self.ax.clear()
 
         # Rotate vertices
@@ -73,7 +114,18 @@ class CubeRenderer:
         self._set_plot_properties(rotated_vertices)
 
     def _calculate_face_properties(self, rotated_vertices, R):
-        """Calculate face centers and normals."""
+        """
+        Calculate face centers and normals.
+
+        Args:
+            rotated_vertices (numpy.ndarray): Rotated cube vertices
+            R (numpy.ndarray): 3x3 rotation matrix
+
+        Returns:
+            tuple: (face_centers, face_normals) containing:
+                - face_centers (list): 3D coordinates of face centers
+                - face_normals (list): Normal vectors for each face
+        """
         face_centers = []
         face_normals = []
 
@@ -104,8 +156,14 @@ class CubeRenderer:
 
     def _draw_normal_stress_arrows(self, face_centers, face_normals,
                                    transformed_stress):
-        """Draw normal stress arrows on cube face."""
+        """
+        Draw normal stress arrows on cube face.
 
+        Args:
+            face_centers (list): 3D coordinates of face centers
+            face_normals (list): Normal vectors for each face
+            transformed_stress (numpy.ndarray): 3x3 transformed stress tensor
+        """
         # -x and +x faces (σx)
         if abs(transformed_stress[0, 0]) > self.threshold:
             sigma_x = transformed_stress[0, 0]
@@ -161,8 +219,14 @@ class CubeRenderer:
                            color='red', arrow_length_ratio=0.2, linewidth=2)
 
     def _draw_shear_stress_arrows(self, face_centers, R, transformed_stress):
-        """Draw shear stress arrows on cube faces."""
+        """
+        Draw shear stress arrows on cube faces.
 
+        Args:
+            face_centers (list): 3D coordinates of face centers
+            R (numpy.ndarray): 3x3 rotation matrix
+            transformed_stress (numpy.ndarray): 3x3 transformed stress tensor
+        """
         # Define direction vectors for each face
         x_dir_rotated = np.array([1, 0, 0]) @ R.T
         y_dir_rotated = np.array([0, 1, 0]) @ R.T
@@ -277,7 +341,12 @@ class CubeRenderer:
                            color='purple', arrow_length_ratio=0.2, linewidth=2)
 
     def _set_plot_properties(self, rotated_vertices):
-        """Set properties for the 3D plot."""
+        """
+        Set properties for the 3D plot.
+
+        Args:
+            rotated_vertices (numpy.ndarray): Rotated cube vertices
+        """
 
         self.ax.set_box_aspect([1, 1, 1])
         self.ax.set_xlabel('X')
