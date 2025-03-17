@@ -6,9 +6,9 @@ import matplotlib.gridspec as gridspec
 
 class StressVisualizer2D:
     def __init__(self):
-        self.sigma_x = -80.0
-        self.sigma_y = 50.0
-        self.tau_xy = -25.0
+        self.sigma_x = 100.0
+        self.sigma_y = 10.0
+        self.tau_xy = 60.0
 
         # Current angle
         self.current_angle = 0
@@ -152,31 +152,31 @@ class StressVisualizer2D:
             # Left face (clockwise)
             self.ax_element.arrow(
                 center[0] - normal_x[0]*size/2, center[1] - normal_x[1]*size/2,
-                -normal_y[0]*adaptive_scale*tau_prime, -
-                normal_y[1]*adaptive_scale*tau_prime,
+                -normal_y[0]*adaptive_scale*tau_prime,
+                -normal_y[1]*adaptive_scale*tau_prime,
                 color='blue', width=0.02, head_width=0.1
             )
 
             # Right face (counterclockwise)
             self.ax_element.arrow(
                 center[0] + normal_x[0]*size/2, center[1] + normal_x[1]*size/2,
-                normal_y[0]*adaptive_scale *
-                tau_prime, normal_y[1]*adaptive_scale*tau_prime,
+                normal_y[0]*adaptive_scale*tau_prime,
+                normal_y[1]*adaptive_scale*tau_prime,
                 color='blue', width=0.02, head_width=0.1
             )
 
             # Bottom face (clockwise)
             self.ax_element.arrow(
                 center[0] - normal_y[0]*size/2, center[1] - normal_y[1]*size/2,
-                normal_x[0]*adaptive_scale *
-                tau_prime, normal_x[1]*adaptive_scale*tau_prime,
+                -normal_x[0]*adaptive_scale*tau_prime,
+                -normal_x[1]*adaptive_scale*tau_prime,
                 color='blue', width=0.02, head_width=0.1
             )
 
             # Top face (counterclockwise)
             self.ax_element.arrow(
                 center[0] + normal_y[0]*size/2, center[1] + normal_y[1]*size/2,
-                -normal_x[0]*adaptive_scale*tau_prime, -
+                normal_x[0]*adaptive_scale*tau_prime,
                 normal_x[1]*adaptive_scale*tau_prime,
                 color='blue', width=0.02, head_width=0.1
             )
